@@ -15,6 +15,8 @@
 #include <crimea_usb.h>
 
 volatile uint8_t volumeControl = 5;
+static uint8_t usbd_control_buffer[256];
+//static char usb_serial_number[25];
 
 #define STACK_SIZE      1024
 #define THREAD_PRIO     42
@@ -57,7 +59,7 @@ int main(void) {
   while (1);
 
   /* We will never get here */
-  return 0;
+  return 0xff;
 }
 
 static void main_thread_func(uint32_t data __maybe_unused) {
