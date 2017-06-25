@@ -5,11 +5,14 @@
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/exti.h>
 #include <libopencm3/stm32/gpio.h>
+#include <libopencm3/usb/audio.h>
+#include <libopencm3/usb/usbd.h>
 
 #include <atom.h>
 #include <ssd1306_i2c.h>
 #include <wchar.h>
 #include <crimea_dac.h>
+#include <crimea_usb.h>
 
 volatile uint8_t volumeControl = 5;
 
@@ -23,17 +26,22 @@ static uint8_t thread_stacks[2][STACK_SIZE];
 static void main_thread_func(uint32_t data);
 
 int main(void) {
+  usbd_device *usbDev;
+
   int8_t status;
 
   board_setup();
   encoder_setup(&volumeControl);
   exti_setup();
   /* Print message */
-  ssd1306_drawWCharStr(0,0,white, wrapDisplay,L"Привет! Это Крым v2.");
+  ssd1306_drawWCharStr(0, 0, white, wrapDisplay, L"Крым v2.");
   ssd1306_refresh();
+  usbDev = usbd_init(&stm32f107_usb_driver, &dev, &conf, usb_strings, 3, usbd_control_buffer,
+                     sizeof(usbd_control_buffer));
+  usbd_register_set_config_callback(usbDev, usb_set_config_handler);
   /**
-   * Initialise OS and set up idle thread
-   */
+ * Initialise OS and set up idle thread
+ */
   status = atomOSInit(&thread_stacks[0][0], STACK_SIZE, FALSE);
 
   if (status == ATOM_OK) {
@@ -58,12 +66,12 @@ static void main_thread_func(uint32_t data __maybe_unused) {
 
   /* Loop forever and blink the LED */
   while (1) {
-    if (vC!=volumeControl) {
+    if (vC != volumeControl) {
       ssd1306_clear();
       vC = volumeControl;
       swprintf(buffer, 40, L"%d", vC);
-      ssd1306_drawWCharStr(0,8,white, nowrap, L"Volume:");
-      ssd1306_drawWCharStr(0,16,white, nowrap, buffer);
+      ssd1306_drawWCharStr(0, 8, white, nowrap, L"Volume:");
+      ssd1306_drawWCharStr(0, 16, white, nowrap, buffer);
       ssd1306_refresh();
     }
     atomTimerDelay(SYSTEM_TICKS_PER_SEC);
