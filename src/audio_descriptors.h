@@ -31,14 +31,14 @@
 /* from PCM2707 descriptor */
 #define CHANNEL_CONFIG_LEFT_RIGHT_FRONT 0x03
 
-struct usb_ac_interface_descriptor_header {
+struct usb_interface_descriptor_header {
   uint8_t bLength;
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
 } __attribute__((packed));
 
 struct usb_ac_interface_input_descriptor {
-  struct usb_ac_interface_descriptor_header head;
+  struct usb_interface_descriptor_header head;
   uint8_t bTerminalID;
   uint16_t wTerminalType;
   uint8_t bAssocTerminal;
@@ -49,7 +49,7 @@ struct usb_ac_interface_input_descriptor {
 } __attribute__((packed));
 
 struct usb_ac_interface_output_descriptor {
-  struct usb_ac_interface_descriptor_header head;
+  struct usb_interface_descriptor_header head;
   uint8_t bTerminalID;
   uint16_t wTerminalType;
   uint8_t bAssocTerminal;
@@ -57,10 +57,10 @@ struct usb_ac_interface_output_descriptor {
   uint8_t iTerminal;
 } __attribute__((packed));
 
-// BEGIN FEATURE DESCRIPTOR
+// ------------------- BEGIN FEATURE DESCRIPTOR ----------------------------
 
 struct usb_ac_interface_feature_head_descriptor {
-  struct usb_ac_interface_descriptor_header head;
+  struct usb_interface_descriptor_header head;
   uint8_t bUnitID;
   uint8_t bSourceID;
   uint8_t bControlSize;
@@ -75,5 +75,58 @@ struct usb_ac_interface_feature_tail_descriptor {
 } __attribute__((packed));
 
 // END FEATURE DESCRIPTOR
+
+#define STREAMING_PCM_FORMAT 1
+
+#define AUDIO_FORMAT_SUBTYPE 2
+#define AUDIO_FORMAT_TYPE_I 1
+// -------------------------- BEGIN AudioStreaming Interface Descriptor -----------------
+
+/*
+ *      AudioStreaming Interface Descriptor:
+        bLength                 7
+        bDescriptorType        36
+        bDescriptorSubtype      1 (AS_GENERAL)
+        bTerminalLink           1
+        bDelay                  0 frames
+        wFormatTag              1 PCM
+ * */
+
+struct usb_audio_streaming_descriptor {
+  struct usb_interface_descriptor_header head;
+  uint8_t bTerminalLink;
+  uint8_t bDelay;
+  uint8_t wFormatTag;
+} __attribute__((packed));
+
+/*      AudioStreaming Interface Descriptor:
+        bLength                17
+        bDescriptorType        36
+        bDescriptorSubtype      2 (FORMAT_TYPE)
+        bFormatType             1 (FORMAT_TYPE_I)
+        bNrChannels             2
+        bSubframeSize           2
+        bBitResolution         16
+        bSamFreqType            3 Discrete
+        tSamFreq[ 0]        32000
+        tSamFreq[ 1]        44100
+        tSamFreq[ 2]        48000 */
+
+struct usb_audio_streaming_format_descriptor_head {
+  struct usb_interface_descriptor_header head;
+  uint8_t bFormatType;
+  uint8_t bNrChannels;
+  uint8_t bSubframeSize;
+  uint8_t bBitResolution;
+  uint8_t bSamFreqType;
+} __attribute__((packed));
+
+struct usb_audio_streaming_format_descriptor_freq {
+  uint8_t byte0;
+  uint8_t byte1;
+  uint8_t byte2;
+};
+
+// END AudioStreaming Interface Descriptor
 
 #endif //CRIMEA_STM32_AUDIO_DESCRIPTORS_H

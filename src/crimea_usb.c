@@ -24,19 +24,31 @@ const struct usb_device_descriptor dev = {
     .bNumConfigurations = 1,
 };
 
-#define bmaControls_count 3
+#define bmaCONTROLS_COUNT 3
+#define SUPPORTED_FREQS 3
 
 const static const struct {
   /* structure is */
   struct usb_audio_header_descriptor_head header_head;
   struct usb_audio_header_descriptor_body header_body;
+
   struct usb_ac_interface_input_descriptor ac_input;
   struct usb_ac_interface_output_descriptor ac_output;
+
   struct usb_ac_interface_feature_head_descriptor feature_head;
   struct usb_ac_interface_feature_control_body_descriptor feature1;
   struct usb_ac_interface_feature_control_body_descriptor feature2;
   struct usb_ac_interface_feature_control_body_descriptor feature3;
   struct usb_ac_interface_feature_tail_descriptor feature_tail;
+
+  struct usb_interface_descriptor zero_ep;
+
+  struct {
+    struct usb_interface_descriptor interface;
+    struct usb_audio_streaming_descriptor terminal;
+    struct usb_audio_streaming_format_descriptor_head format_head;
+    struct usb_audio_streaming_format_descriptor_freq format_freqs[SUPPORTED_FREQS];
+  } stereo_ep;
 } __attribute__((packed)) audio_control_functional_descriptors = {
     // HEADER
         .header_head = {
@@ -45,7 +57,7 @@ const static const struct {
                        sizeof (struct usb_ac_interface_input_descriptor) +
                        sizeof (struct usb_ac_interface_output_descriptor) +
                        sizeof (struct usb_ac_interface_feature_head_descriptor) +
-                       bmaControls_count * sizeof (struct usb_ac_interface_feature_control_body_descriptor) +
+                       bmaCONTROLS_COUNT * sizeof (struct usb_ac_interface_feature_control_body_descriptor) +
                        sizeof (struct usb_ac_interface_feature_tail_descriptor),
             .bDescriptorType = USB_AUDIO_DT_CS_INTERFACE,
             .bDescriptorSubtype = USB_AUDIO_TYPE_HEADER,
@@ -85,7 +97,7 @@ const static const struct {
     // AudioControl FEATURE Interface Descriptor
     .feature_head = {
         .head.bLength = sizeof (struct usb_ac_interface_feature_head_descriptor) +
-                        bmaControls_count * sizeof (struct usb_ac_interface_feature_control_body_descriptor) +
+                        bmaCONTROLS_COUNT * sizeof (struct usb_ac_interface_feature_control_body_descriptor) +
                         sizeof (struct usb_ac_interface_feature_tail_descriptor),
         .head.bDescriptorType = USB_AUDIO_DT_CS_INTERFACE,
         .head.bDescriptorSubtype = USB_AUDIO_TYPE_FEATURE_UNIT,
@@ -104,7 +116,61 @@ const static const struct {
     },
     .feature_tail = {
         .iFeature = 0,
-    }
+    },
+    .zero_ep = {
+        .bLength = sizeof(struct usb_interface_descriptor),
+        .bDescriptorType = USB_DT_INTERFACE,
+        .bInterfaceNumber = 1,
+        .bAlternateSetting = 0,
+        .bNumEndpoints = 0,
+        .bInterfaceClass = USB_CLASS_AUDIO,
+        .bInterfaceSubClass = USB_AUDIO_SUBCLASS_AUDIOSTREAMING,
+        .bInterfaceProtocol = 0,
+        .iInterface = 0,
+    },
+    .stereo_ep = {
+        .interface = {
+            .bLength = sizeof(struct usb_interface_descriptor),
+            .bDescriptorType = USB_DT_INTERFACE,
+            .bInterfaceNumber = 1,
+            .bAlternateSetting = 1,
+            .bNumEndpoints = 1,
+            .bInterfaceClass = USB_CLASS_AUDIO,
+            .bInterfaceSubClass = USB_AUDIO_SUBCLASS_AUDIOSTREAMING,
+            .bInterfaceProtocol = 0,
+            .iInterface = 0,
+        },
+        .terminal = {
+            .head.bLength = sizeof (struct usb_audio_streaming_descriptor),
+            .head.bDescriptorType = USB_AUDIO_DT_CS_INTERFACE,
+            .head.bDescriptorSubtype = USB_AUDIO_SUBCLASS_CONTROL,
+            .bTerminalLink = 1,
+            .bDelay = 0,
+            .wFormatTag = STREAMING_PCM_FORMAT
+        },
+        .format_head = {
+            .head.bLength = sizeof(struct usb_audio_streaming_format_descriptor_head) +
+                            SUPPORTED_FREQS * sizeof (struct usb_audio_streaming_format_descriptor_freq),
+            .head.bDescriptorType = USB_AUDIO_DT_CS_INTERFACE,
+            .head.bDescriptorType = AUDIO_FORMAT_SUBTYPE,
+            .bFormatType = AUDIO_FORMAT_TYPE_I,
+            .bNrChannels = 2,
+            .bSubframeSize = 2,
+            .bBitResolution = 16,
+            .bSamFreqType = 3,
+        },
+        .format_freqs = {{
+             .byte0 = 0x7d,  // 32000 Hz
+             .byte1 = 0x00,
+             .byte2 = 0x00,},{
+             .byte0 = 0xac,  // 44100 Hz
+             .byte1 = 0x44,
+             .byte2 = 0x00,}, {
+             .byte0 = 0xbb,  // 48000 Hz
+             .byte1 = 0x80,
+             .byte2 = 0x00,},
+        }
+    },
 };
 
 const struct usb_interface_descriptor audio_control_iface[] = {{
