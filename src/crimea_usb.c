@@ -48,6 +48,8 @@ const static const struct {
     struct usb_audio_streaming_descriptor terminal;
     struct usb_audio_streaming_format_descriptor_head format_head;
     struct usb_audio_streaming_format_descriptor_freq format_freqs[SUPPORTED_FREQS];
+    struct usb_standard_ac_interrupt_ep_descriptor ep;
+    struct usb_isochronous_audio_data_ep_descriptor audio_data;
   } stereo_ep;
 } __attribute__((packed)) audio_control_functional_descriptors = {
     // HEADER
@@ -169,7 +171,25 @@ const static const struct {
              .byte0 = 0xbb,  // 48000 Hz
              .byte1 = 0x80,
              .byte2 = 0x00,},
-        }
+        },
+        .ep = {
+            .bLength = sizeof(struct usb_standard_ac_interrupt_ep_descriptor),
+            .bDescriptorType = USB_DT_ENDPOINT,
+            .bEndpointAddress = 2 | EP_ADDRESS_OUT,
+            .bmAttributes = EP_ATTR_SYNC_ADAPTIVE | EP_ATTR_TRANSFER_TYPE_ISOCHRONOUS,
+            .wMaxPacketSize = 192,
+            .bInterval = 1,
+            .bRefresh = 0,
+            .bSynchAddress = 0,
+        },
+        .audio_data = {
+            .bLength = sizeof(struct usb_isochronous_audio_data_ep_descriptor),
+            .bDescriptorType = USB_AUDIO_DT_CS_ENDPOINT,
+            .bDescriptorSubtype = USB_AUDIO_TYPE_HEADER,
+            .bmAttributes = EP_ISOCHRONOUS_AUDIO_DATA_NONE_CONTROL,
+            .bLockDelayUnits = 2,
+            .wLockDelay = 512,
+        },
     },
 };
 

@@ -125,8 +125,108 @@ struct usb_audio_streaming_format_descriptor_freq {
   uint8_t byte0;
   uint8_t byte1;
   uint8_t byte2;
-};
+} __attribute__((packed));
 
 // END AudioStreaming Interface Descriptor
+
+// -------------------- Table 4-17: Standard AC Interrupt Endpoint Descriptor
+
+/*
+Offset |  Field           | Size  | Value     | Description
+0         bLength           1       Number      Size of this descriptor, in bytes: 9
+1         bDescriptorType   1       Constant    ENDPOINT descriptor type
+2         bEndpointAddress  1       Endpoint    The address of the endpoint on the USB
+                                                device described by this descriptor. The
+                                                address is encoded as follows:
+                                                  D7:    Direction. 1 = IN endpoint
+                                                  D6..4: Reserved, reset to zero
+                                                  D3..0: The endpoint number, determined by the designer.
+3         bmAttributes      1       Bit Map       D3..2: Synchronization type
+                                                    00 = None
+                                                  D1..0: Transfer type
+                                                    11 = Interrupt
+                                                  All other bits are reserved.
+4         wMaxPacketSize    2       Number        Maximum packet size this endpoint is
+                                                  capable of sending or receiving when this
+                                                  configuration is selected. Used here to
+                                                  pass 2-byte status information.
+                                                  Set to 2 if not shared, set to the
+                                                  appropriate value if shared.
+6         bInterval         1       Number        Left to the designer’s discretion. A value
+                                                  of 10 ms or more seems sufficient.
+7         bRefresh          1       Number        Reset to 0.
+8         bSynchAddress     1       Endpoint      Reset to 0.
+*/
+
+#define EP_ADDRESS_IN   0b10000000
+#define EP_ADDRESS_OUT  0b00000000
+
+#define EP_ATTR_SYNC_NONE        0b00000000
+#define EP_ATTR_SYNC_ASYNC       0b00000100
+#define EP_ATTR_SYNC_ADAPTIVE    0b00001000
+#define EP_ATTR_SYNC_SYNC        0b00001100
+
+#define EP_ATTR_TRANSFER_TYPE_CONTROL     0b00000000
+#define EP_ATTR_TRANSFER_TYPE_ISOCHRONOUS 0b00000001
+#define EP_ATTR_TRANSFER_TYPE_BULK        0b00000010
+#define EP_ATTR_TRANSFER_TYPE_INTERRUPT   0b00000011
+
+
+struct usb_standard_ac_interrupt_ep_descriptor {
+  uint8_t   bLength;
+  uint8_t   bDescriptorType;
+  uint8_t   bEndpointAddress;
+  uint8_t   bmAttributes;
+  uint16_t  wMaxPacketSize;
+  uint8_t   bInterval;
+  uint8_t   bRefresh;
+  uint8_t   bSynchAddress;
+} __attribute__((packed));
+
+/*
+ * Table 4-21: Class-Specific AS Isochronous Audio Data Endpoint Descriptor
+    Offset      | Field             | Size      | Value     | Description
+    0             bLength             1           Number      Size of this descriptor, in bytes: 7
+    1             bDescriptorType     1           Constant    CS_ENDPOINT descriptor type.
+    2             bDescriptorSubtype  1           Constant    EP_GENERAL descriptor subtype.
+    3             bmAttributes        1           Bit Map     A bit in the range D6..0 set to 1 indicates
+                                                              that the mentioned Control is supported
+                                                              by this endpoint.
+                                                                D0:     Sampling Frequency
+                                                                D1:     Pitch
+                                                                D6..2:  Reserved
+                                                              Bit D7 indicates a requirement for
+                                                              wMaxPacketSize packets.
+                                                                D7:     MaxPacketsOnly
+    4             bLockDelayUnits     1           Number      Indicates the units used for the
+                                                              wLockDelay field:
+                                                                0:      Undefined
+                                                                1:      Milliseconds
+                                                                2:      Decoded PCM samples
+                                                                3..255: Reserved
+    5             wLockDelay         2            Number     Indicates the time it takes this endpoint
+                                                             to reliably lock its internal clock recovery
+                                                             circuitry. Units used depend on the value
+                                                             of the bLockDelayUnits field.
+ *
+ * */
+
+#define EP_ISOCHRONOUS_AUDIO_DATA_NONE_CONTROL        0b00000000
+#define EP_ISOCHRONOUS_AUDIO_DATA_SAMPLING_FREQUENCY  0b00000001
+#define EP_ISOCHRONOUS_AUDIO_DATA_PITCH               0b00000010
+#define EP_ISOCHRONOUS_AUDIO_DATA_MAXPACKETSIZEONLY   0b10000000
+
+#define EP_ISOCHRONOUS_AUDIO_DATA_LOCKDELAY_UNDEFINED 0x00
+#define EP_ISOCHRONOUS_AUDIO_DATA_LOCKDELAY_MILLISECONDS 0x01
+#define EP_ISOCHRONOUS_AUDIO_DATA_LOCKDELAY_DECODED_PCM_SAMPLES 0x02
+
+struct usb_isochronous_audio_data_ep_descriptor {
+  uint8_t   bLength;
+  uint8_t   bDescriptorType;
+  uint8_t   bDescriptorSubtype;
+  uint8_t   bmAttributes;
+  uint8_t   bLockDelayUnits;
+  uint16_t  wLockDelay;
+} __attribute__((packed));
 
 #endif //CRIMEA_STM32_AUDIO_DESCRIPTORS_H
