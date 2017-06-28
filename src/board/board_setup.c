@@ -27,6 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <board/board_setup.h>
+
 #include <stdbool.h>
 
 #include <libopencm3/stm32/rcc.h>
@@ -35,16 +37,16 @@
 #include <libopencm3/cm3/cortex.h>
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/spi.h>
-#include <crimea_dac.h>
 #include <atomport.h>
 #include <libopencm3/stm32/i2c.h>
 #include <ssd1306_i2c.h>
 
-static void clock_setup(void) {
+void clock_setup(void) {
   rcc_clock_setup_in_hse_8mhz_out_72mhz();
 
   rcc_periph_clock_enable(RCC_GPIOA);
   rcc_periph_clock_enable(RCC_GPIOB);
+  rcc_periph_clock_enable(RCC_GPIOE);
 
   /* set clock for I2C */
   rcc_periph_clock_enable(RCC_I2C2);
@@ -77,7 +79,7 @@ static void clock_setup(void) {
   usart_enable(USART2);
 }*/
 
-static void spi1_setup(void) {
+void spi1_setup(void) {
 
   /* Configure GPIOs: SS=PA4, SCK=PA5, MISO=PA6 and MOSI=PA7 */
   gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
@@ -121,18 +123,18 @@ static void spi1_setup(void) {
  * sys_tick_handler() periodically once interrupts have been enabled
  * by archFirstThreadRestore()
  */
-static void systick_setup(void) {
+void systick_setup(void) {
   systick_set_frequency(SYSTEM_TICKS_PER_SEC, 72000000);
   systick_interrupt_enable();
   systick_counter_enable();
 }
 
-static void gpio_setup(void) {
+void gpio_setup(void) {
   gpio_set_mode(USB_PULLUP_PORT, GPIO_MODE_OUTPUT_50_MHZ,
               GPIO_CNF_OUTPUT_PUSHPULL, USB_PULLUP_GPIO);
 }
 
-static void i2c_setup(void) {
+void i2c_setup(void) {
   /* Set alternate functions for the SCL and SDA pins of I2C2. */
   gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
                 GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN,
@@ -212,3 +214,30 @@ int board_setup(void) {
 
   return 0;
 }
+
+void usb_pullup(void) {
+  gpio_set(USB_PULLUP_PORT, USB_PULLUP_GPIO);
+}
+
+// ---------------------------------------------- Encoder
+
+#define ENCODER_PORT GPIOA
+#define ENCODER_A GPIO2
+#define ENCODER_B GPIO3
+#define ENCODER_BUTTON GPIO4
+
+uint8_t *vControl;
+
+void encoder_setup(uint8_t *volumeControl) {
+  // Clocks and GPIOs should be initialized in board_setup.c
+  vControl = volumeControl;
+}
+
+void encoder_handler(void) {
+  if (gpio_get(ENCODER_PORT, ENCODER_A) && !gpio_get(ENCODER_PORT, ENCODER_B))
+    *vControl += 1;
+  else if (gpio_get(ENCODER_PORT, ENCODER_A) && gpio_get(ENCODER_PORT, ENCODER_B) && (*vControl>11))
+    *vControl -= 1;
+}
+
+

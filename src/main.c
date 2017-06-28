@@ -9,12 +9,14 @@
 #include <libopencm3/usb/usbd.h>
 
 #include <atom.h>
+
+#include <board/board_setup.h>
+
 #include <ssd1306_i2c.h>
 #include <wchar.h>
-#include <crimea_dac.h>
 #include <crimea_usb.h>
 
-volatile uint8_t volumeControl = 5;
+uint8_t volumeControl = 5;
 static uint8_t usbd_control_buffer[256];
 //static char usb_serial_number[25];
 
@@ -34,7 +36,8 @@ int main(void) {
 
   board_setup();
   encoder_setup(&volumeControl);
-  exti_setup();
+  /* USB pull up*/
+  usb_pullup();
   /* Print message */
   ssd1306_drawWCharStr(0, 0, white, wrapDisplay, L"Крым v2.");
   ssd1306_refresh();

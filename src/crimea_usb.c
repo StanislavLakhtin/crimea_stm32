@@ -239,11 +239,19 @@ const char * usb_strings[] = {
     "unique"
 };
 
+static void ep_callback(usbd_device *usbd_dev, uint8_t ep)
+{
+  (void)ep;
+
+  //char buf[192];
+  //int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 192);
+
+  //gpio_toggle(GPIOC, GPIO12);
+}
+
 void usb_set_config_handler(usbd_device *usbd_dev, uint16_t wValue)
 {
-    (void)wValue;
+  (void)wValue;
 
-    /*usbd_ep_setup(usbd_dev, 0x01, USB_ENDPOINT_ATTR_ISOCHRONOUS, 64,
-                  usbmidi_data_rx_cb);
-    usbd_ep_setup(usbd_dev, 0x81, USB_ENDPOINT_ATTR_BULK, 64, NULL);*/
+  usbd_ep_setup(usbd_dev, 0x02, EP_ATTR_SYNC_ADAPTIVE | EP_ATTR_TRANSFER_TYPE_ISOCHRONOUS, 192, ep_callback);
 }

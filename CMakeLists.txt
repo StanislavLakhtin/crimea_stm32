@@ -44,7 +44,7 @@ set(CMAKE_C_FLAGS " \
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c++14 ${STM32F1_FLAGS}")
 
 set(CMAKE_EXE_LINKER_FLAGS " \
-    -T ${CMAKE_SOURCE_DIR}/libopencm3.ld \
+    -T ${CMAKE_SOURCE_DIR}/libopencm3_stm32f107vc.ld \
      --static -nostartfiles -Wl,--start-group ${NEWLIBS} -Wl,--end-group")
 
 add_custom_target(libopencm3 make WORKING_DIRECTORY ${LIBOPENCM3_ROOT})
