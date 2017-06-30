@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 #Переделать здесь, чтобы не ссылаться на относительные пути для поиска -- некрасиво
-file(GLOB USER_SOURCES ./board/*.c ./*.c
+file(GLOB USER_SOURCES ./*.c
         ${ATOMTHREADS_ROOT}/ports/cortex-m/*.S
         ${ATOMTHREADS_ROOT}/ports/cortex-m/common/st*.c
         ${ATOMTHREADS_ROOT}/ports/cortex-m/atom*.c

@@ -17,7 +17,7 @@ void gpio_setup(void);
 void i2c_setup(void);
 void display_WakeUp(void);
 void usb_pullup(void);
-int board_setup(void);
+int  board_setup(void);
 
 void encoder_handler(void);
 void encoder_setup(uint8_t *volumeControl);

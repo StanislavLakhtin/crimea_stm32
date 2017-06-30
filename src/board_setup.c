@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <board/board_setup.h>
+#include <board_setup.h>
 
 #include <stdbool.h>
 

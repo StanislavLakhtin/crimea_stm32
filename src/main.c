@@ -10,7 +10,7 @@
 
 #include <atom.h>
 
-#include <board/board_setup.h>
+#include <board_setup.h>
 
 #include <ssd1306_i2c.h>
 #include <wchar.h>
