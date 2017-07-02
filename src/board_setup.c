@@ -54,6 +54,8 @@ void clock_setup(void) {
   /* Enable SPI1 Periph and gpio clocks */
   rcc_periph_clock_enable(RCC_SPI1);
 
+  rcc_periph_clock_enable(RCC_USB);
+
   rcc_periph_clock_enable(RCC_AFIO);
   AFIO_MAPR |= AFIO_MAPR_SWJ_CFG_FULL_SWJ_NO_JNTRST;
 }
@@ -201,7 +203,7 @@ int board_setup(void) {
   gpio_setup();
   spi1_setup();
   i2c_setup();
-  display_WakeUp();
+  //display_WakeUp();
 
   /* initialise SysTick counter */
   systick_setup();

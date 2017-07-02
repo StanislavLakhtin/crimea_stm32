@@ -50,7 +50,7 @@ const static const struct {
     struct usb_audio_streaming_format_descriptor_freq format_freqs[SUPPORTED_FREQS];
     struct usb_standard_ac_interrupt_ep_descriptor ep;
     struct usb_isochronous_audio_data_ep_descriptor audio_data;
-  } stereo_ep;
+  } __attribute__((packed)) stereo_ep;
 } __attribute__((packed)) audio_control_functional_descriptors = {
     // HEADER
         .header_head = {
@@ -66,7 +66,19 @@ const static const struct {
             .bcdADC = 0x0100,
             .wTotalLength =
             sizeof(struct usb_audio_header_descriptor_head) +
-            1 * sizeof(struct usb_audio_header_descriptor_body),
+            sizeof(struct usb_audio_header_descriptor_body) +
+            sizeof(struct usb_ac_interface_input_descriptor) +
+            sizeof(struct usb_ac_interface_output_descriptor) +
+            sizeof(struct usb_ac_interface_feature_head_descriptor) +
+            3 * sizeof(struct usb_ac_interface_feature_control_body_descriptor) +
+            sizeof(struct usb_ac_interface_feature_tail_descriptor) +
+            sizeof(struct usb_interface_descriptor) +
+            sizeof(struct usb_interface_descriptor) +
+            sizeof(struct usb_audio_streaming_descriptor) +
+            sizeof(struct usb_audio_streaming_format_descriptor_head) +
+            SUPPORTED_FREQS * sizeof(struct usb_audio_streaming_format_descriptor_freq) +
+            sizeof(struct usb_standard_ac_interrupt_ep_descriptor) +
+            sizeof(struct usb_isochronous_audio_data_ep_descriptor),
             .binCollection = 1,
         },
         .header_body = {
@@ -212,10 +224,7 @@ const struct usb_interface ifaces[] = {
   {
     .num_altsetting = 1,
     .altsetting = audio_control_iface,
-  }, {
-    .num_altsetting = 1,
-    .altsetting = audio_control_iface,
-} };
+  }};
 
 const struct usb_config_descriptor conf = {
     .bLength = USB_DT_CONFIGURATION_SIZE,
@@ -243,8 +252,9 @@ static void ep_callback(usbd_device *usbd_dev, uint8_t ep)
 {
   (void)ep;
 
-  //char buf[192];
-  //int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 192);
+  char buf[192];
+  //int len =
+  usbd_ep_read_packet(usbd_dev, 0x01, buf, 192);
 
   //gpio_toggle(GPIOC, GPIO12);
 }

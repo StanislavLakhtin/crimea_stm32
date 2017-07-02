@@ -29,21 +29,23 @@ static uint8_t thread_stacks[2][STACK_SIZE];
 
 static void main_thread_func(uint32_t data);
 
+usbd_device *usbDev;
+
 int main(void) {
-  usbd_device *usbDev;
 
   int8_t status;
 
   board_setup();
   encoder_setup(&volumeControl);
-  /* USB pull up*/
-  usb_pullup();
+
   /* Print message */
-  ssd1306_drawWCharStr(0, 0, white, wrapDisplay, L"Крым v2.");
-  ssd1306_refresh();
+  //ssd1306_drawWCharStr(0, 0, white, wrapDisplay, L"Крым v2.");
+  //ssd1306_refresh();
   usbDev = usbd_init(&stm32f107_usb_driver, &dev, &conf, usb_strings, 3, usbd_control_buffer,
                      sizeof(usbd_control_buffer));
   usbd_register_set_config_callback(usbDev, usb_set_config_handler);
+  /* USB pull up*/
+  usb_pullup();
   /**
  * Initialise OS and set up idle thread
  */
@@ -59,7 +61,8 @@ int main(void) {
     }
   }
 
-  while (1);
+  while (1)
+    usbd_poll(usbDev);
 
   /* We will never get here */
   return 0xff;
@@ -72,12 +75,12 @@ static void main_thread_func(uint32_t data __maybe_unused) {
   /* Loop forever and blink the LED */
   while (1) {
     if (vC != volumeControl) {
-      ssd1306_clear();
+      //ssd1306_clear();
       vC = volumeControl;
       swprintf(buffer, 40, L"%d", vC);
-      ssd1306_drawWCharStr(0, 8, white, nowrap, L"Volume:");
-      ssd1306_drawWCharStr(0, 16, white, nowrap, buffer);
-      ssd1306_refresh();
+      //ssd1306_drawWCharStr(0, 8, white, nowrap, L"Volume:");
+      //ssd1306_drawWCharStr(0, 16, white, nowrap, buffer);
+      //ssd1306_refresh();
     }
     atomTimerDelay(SYSTEM_TICKS_PER_SEC);
   }
