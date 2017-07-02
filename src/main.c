@@ -17,7 +17,7 @@
 #include <crimea_usb.h>
 
 uint8_t volumeControl = 5;
-static uint8_t usbd_control_buffer[256];
+static uint8_t usbd_control_buffer[512];
 //static char usb_serial_number[25];
 
 #define STACK_SIZE      1024
@@ -33,7 +33,7 @@ usbd_device *usbDev;
 
 int main(void) {
 
-  int8_t status;
+  int8_t osInitStatus;
 
   board_setup();
   encoder_setup(&volumeControl);
@@ -49,14 +49,14 @@ int main(void) {
   /**
  * Initialise OS and set up idle thread
  */
-  status = atomOSInit(&thread_stacks[0][0], STACK_SIZE, FALSE);
+  osInitStatus = atomOSInit(&thread_stacks[0][0], STACK_SIZE, FALSE);
 
-  if (status == ATOM_OK) {
+  if (osInitStatus == ATOM_OK) {
     /* Set up main thread */
-    status = atomThreadCreate(&main_tcb, THREAD_PRIO, main_thread_func, 0,
+    osInitStatus = atomThreadCreate(&main_tcb, THREAD_PRIO, main_thread_func, 0,
                               &thread_stacks[1][0], STACK_SIZE, TRUE);
 
-    if (status == ATOM_OK) {
+    if (osInitStatus == ATOM_OK) {
       atomOSStart();
     }
   }

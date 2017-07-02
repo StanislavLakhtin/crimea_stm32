@@ -54,7 +54,7 @@ void clock_setup(void) {
   /* Enable SPI1 Periph and gpio clocks */
   rcc_periph_clock_enable(RCC_SPI1);
 
-  rcc_periph_clock_enable(RCC_USB);
+  rcc_periph_clock_enable(RCC_OTGFS);
 
   rcc_periph_clock_enable(RCC_AFIO);
   AFIO_MAPR |= AFIO_MAPR_SWJ_CFG_FULL_SWJ_NO_JNTRST;
@@ -132,6 +132,8 @@ void systick_setup(void) {
 }
 
 void gpio_setup(void) {
+  // USB pins
+  gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN, GPIO9 | GPIO10 | GPIO11 | GPIO12 );
   gpio_set_mode(USB_PULLUP_PORT, GPIO_MODE_OUTPUT_50_MHZ,
               GPIO_CNF_OUTPUT_PUSHPULL, USB_PULLUP_GPIO);
 }
