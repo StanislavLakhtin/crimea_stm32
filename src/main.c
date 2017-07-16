@@ -31,6 +31,18 @@ static void main_thread_func(uint32_t data);
 
 usbd_device *usbDev;
 
+void usb_wakeup_isr(void) {
+  atomIntEnter();
+  usbd_poll(usbDev);
+  atomIntExit(0);
+}
+
+void usb_lp_can_rx0_isr(void) {
+  atomIntEnter();
+  usbd_poll(usbDev);
+  atomIntExit(0);
+}
+
 int main(void) {
 
   int8_t osInitStatus;
@@ -44,6 +56,8 @@ int main(void) {
   usbDev = usbd_init(&stm32f107_usb_driver, &dev, &conf, usb_strings, 3, usbd_control_buffer,
                      sizeof(usbd_control_buffer));
   usbd_register_set_config_callback(usbDev, usb_set_config_handler);
+  nvic_enable_irq(NVIC_USB_LP_CAN_RX0_IRQ);
+  nvic_enable_irq(NVIC_USB_WAKEUP_IRQ);
   /* USB pull up*/
   usb_pullup();
   /**
@@ -61,8 +75,7 @@ int main(void) {
     }
   }
 
-  while (1)
-    usbd_poll(usbDev);
+  while (1);
 
   /* We will never get here */
   return 0xff;
@@ -74,6 +87,7 @@ static void main_thread_func(uint32_t data __maybe_unused) {
 
   /* Loop forever and blink the LED */
   while (1) {
+    usbd_poll(usbDev);
     if (vC != volumeControl) {
       //ssd1306_clear();
       vC = volumeControl;

@@ -213,6 +213,7 @@ int board_setup(void) {
   /* Set exception priority levels. Make PendSv the lowest priority and
    * SysTick the second to lowest
    */
+
   nvic_set_priority(NVIC_PENDSV_IRQ, 0xFF);
   nvic_set_priority(NVIC_SYSTICK_IRQ, 0xFE);
 

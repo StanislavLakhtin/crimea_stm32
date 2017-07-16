@@ -263,5 +263,5 @@ void usb_set_config_handler(usbd_device *usbd_dev, uint16_t wValue)
 {
   (void)wValue;
 
-  usbd_ep_setup(usbd_dev, 0x02, EP_ATTR_SYNC_ADAPTIVE | EP_ATTR_TRANSFER_TYPE_ISOCHRONOUS, 192, ep_callback);
+  usbd_ep_setup(usbd_dev, 0x01, EP_ATTR_SYNC_ADAPTIVE | EP_ATTR_TRANSFER_TYPE_ISOCHRONOUS, 192, ep_callback);
 }
